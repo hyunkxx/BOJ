@@ -19,6 +19,9 @@ int width, height, safe;
 int x[4] = {  0, 0, -1, 1 };
 int y[4] = { -1, 1,  0, 0 };
 
+queue<Pos> virus;
+vector<Pos> virusPos;
+
 void CopyGraph()
 {
     memcpy(board_copy, board, sizeof(board[0]) * 10);
@@ -27,28 +30,21 @@ void CopyGraph()
 void ResetState()
 {
     memset(visited, 0, sizeof(visited[0]) * 10);
+
+    for (auto e : virusPos)
+    {
+        Pos pos = e;
+        virus.push(pos);
+        visited[pos.y][pos.x] = true;
+    }
 }
 
 void BFS()
 {
-    queue<Pos> q;
-
-    for (int i = 0; i < height; ++i)
+    while (!virus.empty())
     {
-        for (int j = 0; j < width; ++j)
-        {
-            if (board_copy[i][j] == 2)
-            {
-                q.push({ j, i });
-                visited[i][j] = true;
-            }
-        }
-    }
-
-    while (!q.empty())
-    {
-        Pos cur = q.front();
-        q.pop();
+        Pos cur = virus.front();
+        virus.pop();
 
         for (int i = 0; i < 4; ++i)
         {
@@ -66,7 +62,7 @@ void BFS()
 
             visited[ny][nx] = true;
             board_copy[ny][nx] = 2;
-            q.push({ nx, ny });
+            virus.push({ nx, ny });
         }
     }
 
@@ -118,7 +114,12 @@ int main()
     for (int i = 0; i < height; ++i)
     {
         for (int j = 0; j < width; ++j)
+        {
             cin >> board[i][j];
+
+            if (board[i][j] == 2)
+                virusPos.push_back({ j, i });
+        }
     }
 
     SearchRecursive(0, 0, 0);
